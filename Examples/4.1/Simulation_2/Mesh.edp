@@ -1,0 +1,17 @@
+int N = 10; // number of segments in the initial mesh
+real l1 = 0.5; // half of the dimensionless length 
+// pre-crack definitions
+real lc=0.002; // crack opening prescribed
+real lb=0.005; // Segment Fig. B.1(a)
+
+border a1(dum=-l1,l1)	{x=dum;		y=-l1;			label=1;}
+border a2(dum=-l1,l1)	{x=l1;		y=dum;			label=2;}
+border a3(dum=l1,-l1)	{x=dum;		y=l1;			label=3;}
+border a4(dum=l1,lc)	{x=-l1;		y=dum;			label=2;}
+border a5(dum=-l1,0)	{x=dum;	 	y=lc;			label=2;}
+border a6(dum=lc,-lc)	{x=0;	 	y=dum;			label=2;}
+border a7(dum=0,-l1)	{x=dum;	 	y=-lc;			label=2;}
+border a8a(dum=-lc,-(l1-lb))	{x=-l1;		y=dum;			label=2;}
+border a8b(dum=-(l1-lb),-l1)	{x=-l1;		y=dum;			label=4;}
+
+mesh Th = buildmesh( a1(2*N)+a2(2*N)+a3(2*N)+a4(2*N)+a5(N)+a6(N)+a7(N)+a8a(N)+a8b(N)); 

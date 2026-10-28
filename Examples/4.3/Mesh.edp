@@ -1,0 +1,66 @@
+// ================================================================================
+// ================================================================================
+// ================================================================================
+// MESH
+// ================================================================================
+// This variables are specifically defined for the mesh, It is good for them to be
+// global. Potentially they are needed to compute the forces Fk. The mesh is 
+// already defined in the dimensionless system
+int N = 10; // number of segments in the initial mesh
+real l1 = 0.5; // half of the dimensionless length 
+
+// notch geometry
+real ln = 0.2;   // notch length
+real lc = 0.002; // half opening of the notch
+real ly = 0.05;  // vertical offset from the centre
+real ld = 0.001;
+// notch centres
+real yl = -ly;   // left notch
+real yr =  ly;   // right notch
+
+// notch-tip positions
+real xl = -l1 + ln; // -0.3
+real xr =  l1 - ln; //  0.3
+
+
+// ----------------------------------------------------
+// Outer boundary + right notch
+// ----------------------------------------------------
+
+// bottom boundary
+border a1a(dum=-l1,-(l1-ld)){x=dum;  y=-l1;  label=4;}
+border a1b(dum=-(l1-ld),l1){x=dum;  y=-l1;  label=1;}
+
+// right boundary below right notch
+border a2(dum=-l1,yr-lc){x=l1; y=dum; label=2;}
+
+// lower face of right notch
+border a3(dum=l1,xr){x=dum;  y=yr-lc;  label=2;}
+// tip of right notch
+border a4(dum=yr-lc,yr+lc){ x=xr; y=dum; label=2;}
+// upper face of right notch
+border a5(dum=xr,l1){ x=dum;   y=yr+lc;   label=2;}
+
+// right boundary above right notch
+border a6(dum=yr+lc,l1){ x=l1;  y=dum;  label=2;}
+
+// top boundary
+border a7(dum=l1,-l1){ x=dum;  y=l1;  label=3;}
+
+// left boundary above left notch
+border a8(dum=l1,yl+lc){ x=-l1;  y=dum;  label=2;}
+
+// upper face of left notch
+border a9(dum=-l1,xl){  x=dum;  y=yl+lc;  label=2;}
+// tip of left notch
+border a10(dum=yl+lc,yl-lc){  x=xl;  y=dum;  label=2;}
+// lower face of left notch
+border a11(dum=xl,-l1){  x=dum;  y=yl-lc;  label=2;}
+
+// left boundary below left notch
+border a12(dum=yl-lc,-(l1-ld)){  x=-l1;  y=dum;  label=2;}
+// left boundary below left notch
+border a13(dum=-(l1-ld),-l1){  x=-l1;  y=dum;  label=4;}
+
+// initial mesh
+mesh Th = buildmesh( a1a(2*N)+a1b(2*N)+ a2(N)+ a3(N) + a4(N) + a5(N) + a6(N) + a7(2*N) + a8(N) + a9(N) + a10(N) + a11(N) + a12(N) + a13(N));

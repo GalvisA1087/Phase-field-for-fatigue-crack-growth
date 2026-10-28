@@ -1,0 +1,36 @@
+// ================================================================================
+// ================================================================================
+// ================================================================================
+// PARAMETERS
+// ==============================================================================
+int Usingmask=1; // 0-> no, 1 - > yes
+real thickmask=1.0;
+int Ncorr = 1; // by default is always 1
+int nCycles=1600;	 // Number of cycles
+// Number of simulation points in a single cycle
+int Nc=8; // 4 load points for R = 0, 8 load points for R = -1
+int DN = 0; // jump of cycles 
+real l = 0.004e-3; // characteristic length ("crack width") in m
+real lambda = 121.15e9;  // First Lame parameter in Pa 
+real mu = 80.76e9; // shear modulus in Pa
+real Gc = 2700; // Energy released rate in J/m, or N/m
+real curlU = 0.003e-3; // Typical displacement in m
+real L0 = 1e-3; // Typical length in m
+real alphaT = 56250000; // N/m^2 fatigue threshold elastic strain energy density
+
+// Numerical parameter
+real kappa = 0.00005; 
+
+// Tolerance for the iterative process and Newton Raphson
+real Tol = 1e-5; 
+
+// Adaptmesh parameters
+int tm=0; // Isometric mesh 0, and  Aniso 1
+real lmax=0.05; // Maximum edge size of the adapt mesh
+real zeta =1.0/8.0;
+real rat = 1.8;
+real error=0.005; 
+int mNv = 100000; // Maximum number of vertices generated in the adaptmesh process
+
+// Exporting results
+string vtuFiles="Results_sPFf/sPFf_";

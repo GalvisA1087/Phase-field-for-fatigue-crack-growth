@@ -1,0 +1,16 @@
+// ================================================================================
+// ================================================================================
+// ================================================================================
+// ================================================================================
+// VARIATIONAL MASK PROBLEM
+// ================================================================================	
+
+	// 1. Define the boundary layer thickness 
+	// Setting it to 2-3 times the crack width is usually ideal
+	gamma = thickmask * sqrt(beta); 
+
+	// 2. Variational problem for the geometry-independent mask
+	problem GenerateMask(mask, vMask) = 
+		int2d(Th)( mask * vMask + (gamma^2) * (dx(mask)*dx(vMask) + dy(mask)*dy(vMask)) )
+	  - int2d(Th)( 1.0 * vMask )
+	  + on(0, mask = 0.0);   // Replace (0) with the correcet Label(s) with your displacement/traction boundary ID

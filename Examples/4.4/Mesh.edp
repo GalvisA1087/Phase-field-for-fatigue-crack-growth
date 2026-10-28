@@ -1,0 +1,553 @@
+
+/* =====================================================
+   PLATE WITH CIRCULAR HOLE AND FOUR INITIAL CRACKS
+
+   Dimensionless geometry
+   Reference length: L = 400 mm
+
+   Coordinate origin: geometric centre of the plate
+
+   Crack 1: 25 mm, left boundary
+   Crack 2: 25 mm, internal
+   Crack 3: 10 mm, attached to circular hole
+   Crack 4: 25 mm, right boundary
+
+   Boundary labels:
+   Bottom  = 1
+   Right   = 2
+   Top     = 3
+   Left    = 4
+
+   Crack 1 = 11
+   Crack 2 = 12
+   Crack 3 = 13
+   Crack 4 = 14
+
+   Hole    = 20
+   ===================================================== */
+
+
+// =====================================================
+// 1. REFERENCE LENGTH AND EXTERNAL GEOMETRY
+// =====================================================
+
+real L = 400.0;
+
+// Plate dimensions
+
+real W = 400.0/L;
+real H2 = 250.0/L;
+
+// External coordinates
+
+real xL = -W/2.0;
+real xR =  W/2.0;
+
+real yB = -H2/2.0;
+real yT =  H2/2.0;
+
+
+// =====================================================
+// 2. NUMERICAL CRACK OPENING
+// =====================================================
+
+// Small opening used to represent the initial cracks
+// as thin geometrical slots.
+
+real epsCr = 0.0005;
+
+
+// =====================================================
+// 3. CRACK 1 - LEFT BOUNDARY
+// =====================================================
+
+// Length: 25 mm
+// Position: 70 mm below the upper boundary
+
+real a1 = 25.0/L;
+
+real yC1 = yT - 70.0/L;
+
+real xC1tip = xL + a1;
+
+
+// =====================================================
+// 4. CRACK 2 - INTERNAL CRACK
+// =====================================================
+
+// Length: 25 mm
+// Left tip: 125 mm from the left boundary
+// Height: 100 mm above the bottom boundary
+
+real a2 = 25.0/L;
+
+real x2a = xL + 125.0/L;
+
+real x2b = x2a + a2;
+
+real y2 = yB + 100.0/L;
+
+
+// =====================================================
+// 5. CIRCULAR HOLE
+// =====================================================
+
+// Centre: (250 mm, 125 mm)
+// Diameter: 60 mm
+
+real xH = xL + 250.0/L;
+
+real yH = yB + 125.0/L;
+
+real rH = 30.0/L;
+
+
+// =====================================================
+// 6. CRACK 3 - ATTACHED TO THE CIRCULAR HOLE
+// =====================================================
+
+// Length: 10 mm measured from the circular boundary
+
+real a3 = 10.0/L;
+
+// Crack tip
+
+real x3tip = xH + rH + a3;
+
+real y3 = yH;
+
+// Connection between the circular hole and the slit
+
+real theta0 = asin(epsCr/(2.0*rH));
+
+// Horizontal coordinate of the attachment points
+
+real xAttach = xH + rH*cos(theta0);
+
+
+// =====================================================
+// 7. CRACK 4 - RIGHT BOUNDARY
+// =====================================================
+
+// Length: 25 mm
+// Position: 95 mm above the lower boundary
+
+real a4 = 25.0/L;
+
+real yC4 = yB + 95.0/L;
+
+real xC4tip = xR - a4;
+
+
+// =====================================================
+// 8. BOUNDARY LABELS
+// =====================================================
+
+int labBottom = 1;
+
+int labRight = 2;
+
+int labTop = 3;
+
+int labLeft = 4;
+
+
+// Initial cracks
+
+int labCr1 = 11;
+
+int labCr2 = 12;
+
+int labCr3 = 13;
+
+int labCr4 = 14;
+
+
+// Circular hole
+
+int labHole = 20;
+
+
+// =====================================================
+// 9. MESH DISCRETISATION
+// =====================================================
+
+int nx = 100;
+
+int nSide = 35;
+
+int nCr = 12;
+
+int nTip = 2;
+
+int nHole = 120;
+
+
+// =====================================================
+// 10. EXTERNAL BOUNDARY
+// =====================================================
+
+
+// -----------------------------------------------------
+// BOTTOM BOUNDARY
+// Left -> Right
+// -----------------------------------------------------
+
+border bottom(t=0,1)
+{
+    x = xL + (xR-xL)*t;
+
+    y = yB;
+
+    label = labBottom;
+}
+
+
+// -----------------------------------------------------
+// RIGHT BOUNDARY - LOWER PART
+// -----------------------------------------------------
+
+border rightLower(t=0,1)
+{
+    x = xR;
+
+    y = yB
+      + (yC4-epsCr/2.0-yB)*t;
+
+    label = labRight;
+}
+
+
+// =====================================================
+// 11. CRACK 4 - RIGHT BOUNDARY
+// =====================================================
+
+
+// Lower face: boundary -> crack tip
+
+border crack4Lower(t=0,1)
+{
+    x = xR + (xC4tip-xR)*t;
+
+    y = yC4-epsCr/2.0;
+
+    label = labCr4;
+}
+
+
+// Crack tip
+
+border crack4Tip(t=0,1)
+{
+    x = xC4tip;
+
+    y = yC4-epsCr/2.0+epsCr*t;
+
+    label = labCr4;
+}
+
+
+// Upper face: crack tip -> boundary
+
+border crack4Upper(t=0,1)
+{
+    x = xC4tip + (xR-xC4tip)*t;
+
+    y = yC4+epsCr/2.0;
+
+    label = labCr4;
+}
+
+
+// -----------------------------------------------------
+// RIGHT BOUNDARY - UPPER PART
+// -----------------------------------------------------
+
+border rightUpper(t=0,1)
+{
+    x = xR;
+
+    y = yC4+epsCr/2.0
+      + (yT-yC4-epsCr/2.0)*t;
+
+    label = labRight;
+}
+
+
+// -----------------------------------------------------
+// TOP BOUNDARY
+// Right -> Left
+// -----------------------------------------------------
+
+border top(t=0,1)
+{
+    x = xR + (xL-xR)*t;
+
+    y = yT;
+
+    label = labTop;
+}
+
+
+// -----------------------------------------------------
+// LEFT BOUNDARY - UPPER PART
+// -----------------------------------------------------
+
+border leftUpper(t=0,1)
+{
+    x = xL;
+
+    y = yT
+      + (yC1+epsCr/2.0-yT)*t;
+
+    label = labLeft;
+}
+
+
+// =====================================================
+// 12. CRACK 1 - LEFT BOUNDARY
+// =====================================================
+
+
+// Upper face: boundary -> crack tip
+
+border crack1Upper(t=0,1)
+{
+    x = xL + (xC1tip-xL)*t;
+
+    y = yC1+epsCr/2.0;
+
+    label = labCr1;
+}
+
+
+// Crack tip
+
+border crack1Tip(t=0,1)
+{
+    x = xC1tip;
+
+    y = yC1+epsCr/2.0-epsCr*t;
+
+    label = labCr1;
+}
+
+
+// Lower face: crack tip -> boundary
+
+border crack1Lower(t=0,1)
+{
+    x = xC1tip + (xL-xC1tip)*t;
+
+    y = yC1-epsCr/2.0;
+
+    label = labCr1;
+}
+
+
+// -----------------------------------------------------
+// LEFT BOUNDARY - LOWER PART
+// -----------------------------------------------------
+
+border leftLower(t=0,1)
+{
+    x = xL;
+
+    y = yC1-epsCr/2.0
+      + (yB-yC1+epsCr/2.0)*t;
+
+    label = labLeft;
+}
+
+
+// =====================================================
+// 13. CRACK 2 - INTERNAL CRACK
+// =====================================================
+
+// The internal crack is represented as a thin
+// rectangular slit with a closed boundary.
+
+
+// Lower face: left -> right
+
+border crack2Lower(t=0,1)
+{
+    x = x2a+(x2b-x2a)*t;
+
+    y = y2-epsCr/2.0;
+
+    label = labCr2;
+}
+
+
+// Right tip: bottom -> top
+
+border crack2Right(t=0,1)
+{
+    x = x2b;
+
+    y = y2-epsCr/2.0+epsCr*t;
+
+    label = labCr2;
+}
+
+
+// Upper face: right -> left
+
+border crack2Upper(t=0,1)
+{
+    x = x2b+(x2a-x2b)*t;
+
+    y = y2+epsCr/2.0;
+
+    label = labCr2;
+}
+
+
+// Left tip: top -> bottom
+
+border crack2Left(t=0,1)
+{
+    x = x2a;
+
+    y = y2+epsCr/2.0-epsCr*t;
+
+    label = labCr2;
+}
+
+
+// =====================================================
+// 14. CIRCULAR HOLE + CRACK 3
+// =====================================================
+
+// The hole and crack 3 form a single connected
+// internal boundary.
+//
+// The circular arc starts at the upper attachment
+// point and ends at the lower attachment point.
+//
+// Crack 3 is then connected directly to the hole
+// through its lower and upper faces.
+
+
+// -----------------------------------------------------
+// CIRCULAR ARC
+// -----------------------------------------------------
+
+border holeArc(t=theta0,2*pi-theta0)
+{
+    x = xH+rH*cos(t);
+
+    y = yH+rH*sin(t);
+
+    label = labHole;
+}
+
+
+// -----------------------------------------------------
+// CRACK 3 - LOWER FACE
+// From circular boundary to crack tip
+// -----------------------------------------------------
+
+border crack3Lower(t=0,1)
+{
+    x = xAttach+(x3tip-xAttach)*t;
+
+    y = yH-epsCr/2.0;
+
+    label = labCr3;
+}
+
+
+// -----------------------------------------------------
+// CRACK 3 - TIP
+// -----------------------------------------------------
+
+border crack3Tip(t=0,1)
+{
+    x = x3tip;
+
+    y = yH-epsCr/2.0+epsCr*t;
+
+    label = labCr3;
+}
+
+
+// -----------------------------------------------------
+// CRACK 3 - UPPER FACE
+// From crack tip to circular boundary
+// -----------------------------------------------------
+
+border crack3Upper(t=0,1)
+{
+    x = x3tip+(xAttach-x3tip)*t;
+
+    y = yH+epsCr/2.0;
+
+    label = labCr3;
+}
+
+
+// =====================================================
+// 15. MESH GENERATION
+// =====================================================
+
+// The external boundary is counterclockwise.
+//
+// The internal crack 2 and the connected
+// hole/crack 3 boundaries are defined
+// counterclockwise and inserted with negative
+// discretisation numbers to create void regions.
+
+mesh Th = buildmesh(
+
+      // External boundary
+
+      bottom(nx)
+
+    + rightLower(nSide)
+
+    // Crack 4
+
+    + crack4Lower(nCr)
+    + crack4Tip(nTip)
+    + crack4Upper(nCr)
+
+    + rightUpper(nSide)
+
+    + top(nx)
+
+    + leftUpper(nSide)
+
+    // Crack 1
+
+    + crack1Upper(nCr)
+    + crack1Tip(nTip)
+    + crack1Lower(nCr)
+
+    + leftLower(nSide)
+
+
+    // -----------------------------------------
+    // Internal crack 2
+    // -----------------------------------------
+
+    + crack2Lower(-nCr)
+    + crack2Right(-nTip)
+    + crack2Upper(-nCr)
+    + crack2Left(-nTip)
+
+
+    // -----------------------------------------
+    // Circular hole + attached crack 3
+    // -----------------------------------------
+
+    + holeArc(-nHole)
+
+    + crack3Lower(-nCr)
+    + crack3Tip(-nTip)
+    + crack3Upper(-nCr)
+
+);
+
+
