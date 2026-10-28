@@ -85,13 +85,6 @@ After every computed cycle, the phase-field, displacement, strain and stress fie
 If you use this code, please cite:
 
 ```bibtex
-@article{Galvis_fatigue,
-  author  = {Galvis, Andres F. and Sahu, Smita and Prada, Daniel M. and {\'A}vila, Julian A.},
-  title   = {An adaptive phase-field framework for low- and high-cycle fatigue crack growth in brittle materials},
-  journal = {Submitted to International Journal of Fatigue},
-  year    = {2026}
-}
-
 @article{Galvis2026,
   author  = {Galvis, Andres F.},
   title   = {Phase-field modelling of quasi-static and dynamic brittle fracture: A FreeFEM++ implementation},
