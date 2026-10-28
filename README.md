@@ -26,22 +26,6 @@ Each example folder contains the five problem-specific scripts required to repro
 ```
 Phase-field-for-fatigue-crack-growth/
 ├── CODE/                        # Main simulation scripts (modular .edp files)
-│   ├── sPFf.edp                 # Main routine: cycle blocks and cycle jump
-│   ├── Parameters.edp           # Material, loading and numerical parameters
-│   ├── Variables.edp            # Plugins, nondimensionalisation, counters
-│   ├── Mesh.edp                 # Geometry, boundary labels and initial mesh
-│   ├── FEspace.edp              # P1 spaces and solution, history and fatigue fields
-│   ├── Variational.edp          # Weak forms and Dirichlet boundary conditions
-│   ├── Mask.edp                 # Boundary-mask problem (optional)
-│   ├── Functions.edp            # Convergence check, spectral split, Heaviside and
-│   │                            # fatigue degradation functions
-│   ├── BoundaryConditions.edp   # Normalised load steps within one cycle
-│   ├── ComputeOneCycle.edp      # One cycle: predictor, corrections and updates
-│   ├── Mesh_Adapt.edp           # Metric-based mesh adaptation
-│   ├── PostProcessing.edp       # Adaptation, field transfer and storage of the
-│   │                            # fatigue history for the cycle jump
-│   ├── ExportVTU.edp            # Dimensional fields exported in VTU format
-│   └── PlotFreeFEM.edp          # Phase-field visualisation within FreeFEM++
 ├── Examples/                    # Example problems from the paper (Section 4.x)
 │   ├── 4.1/                     # Single-edge notched tension test
 │   ├── 4.2/                     # Single-edge notched shear test (R = 0 and R = -1)
@@ -69,27 +53,6 @@ To run the code, you need:
 
 > 📌 Only the `iovtk`, `lapack` and `MUMPS_seq` plugins are used, all of which are included in the standard FreeFEM++ distribution.  
 > No external libraries or parallel tools are required. The code runs in **serial** mode.
-
----
-
-## 🔧 Main Parameters
-
-All input parameters are defined and commented in `Parameters.edp`. The main numerical parameters, with their notation in the paper, are:
-
-| Variable    | Paper          | Description                                              |
-|-------------|----------------|----------------------------------------------------------|
-| `zeta`      | ζ              | Minimum element size factor, h_min = ζ ℓ/L               |
-| `lmax`      | l_max          | Maximum element size                                     |
-| `rat`       | R_h            | Mesh-gradation ratio                                     |
-| `error`     | δ_h            | Interpolation-error tolerance of the mesh adaptation     |
-| `tm`        | t_m            | Mesh adaptation: `1` isotropic, `0` anisotropic          |
-| `Ncorr`     | N_corr         | Number of same-load corrections (default `1`)            |
-| `DN`        | ΔN             | Jump size; `0` gives a cycle-by-cycle solution           |
-| `nCycles`   | N_T            | Total number of loading cycles                           |
-| `Nc`        | m              | Number of load steps per cycle                           |
-| `Usingmask` | –              | Boundary mask: `1` active, `0` inactive                  |
-| `thickmask` | ξ              | Mask length parameter                                    |
-| `vtuFiles`  | –              | Output path and file prefix                              |
 
 ---
 
