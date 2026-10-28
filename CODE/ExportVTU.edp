@@ -1,0 +1,60 @@
+// ================================================================================
+// ================================================================================
+// Function to export a .vtu file with dimensional results
+
+func real ExportToVTUfile(mesh &Thl, real[int] &val0, real[int] &val1, real[int] &val2, real[int] &val3, real[int] &val4, real[int] &val5,real[int] &val6, real[int] &val7, int i){
+
+	// Local FEspaces
+	fespace Vhl(Thl, [Pk,Pk]);
+	Vhl [u1l,u2l];	
+	fespace Xhl(Thl, Pk);
+	Xhl dl;
+	Xhl eps11l, eps22l, eps12l;
+	Xhl sigma11l, sigma22l, sigma12l;	
+	
+	dl[]=val0; u1l[]=val1;
+	eps11l[]=val2; eps22l[]=val3; eps12l[]=val4;
+	sigma11l[]=val5; sigma22l[]=val6; sigma12l[]=val7;
+
+	// Back to the dimensional results
+	mesh ThDim = movemesh(Thl, [L0*x, L0*y]);
+	
+	// dimensional fespaces
+	fespace XhDim(ThDim, Pk);
+	XhDim dDim, maskDim;	
+	XhDim eps11Dim, eps22Dim, eps12Dim;
+	XhDim sigma11Dim, sigma22Dim, sigma12Dim;
+	XhDim sigmaV;
+	
+	fespace VhDim(ThDim, [Pk,Pk]);
+	VhDim [u1Dim,u2Dim];		
+	
+	// interpolating phase field
+	dDim[] = dl[];
+	
+	// back to dimensional displacements
+	u1Dim[] = curlU*u1l[];
+	u2Dim[] = curlU*u2l[];	
+	
+	// calculating strains
+	eps11Dim[] = (curlU/L0)*eps11l[];
+	eps22Dim[] = (curlU/L0)*eps22l[];
+	eps12Dim[] = (curlU/L0)*eps12l[];
+	
+	// calculating stresses
+	sigma11Dim[] = (curlU*lambda/L0)*sigma11l[];
+	sigma22Dim[] = (curlU*lambda/L0)*sigma22l[];		
+	sigma12Dim[] = (curlU*lambda/L0)*sigma12l[];	
+	
+	// Equivalent von Mises stress	
+	sigmaV = sqrt( sigma11Dim^2 - sigma11Dim*sigma22Dim + sigma22Dim^2 + 3.0*(sigma12Dim^2) );
+	
+	// Paraview variables
+	int[int] Order = [1,1,1,1,1];
+	string DataName = "d u_i Sigma_ij Epsilon_ij Sv";
+	
+	// Paraview files
+	
+	savevtk(vtuFiles + i + ".vtu", ThDim, dDim, [u1Dim,u2Dim,0], [sigma11Dim,sigma22Dim,sigma12Dim], [eps11Dim,eps22Dim,eps12Dim], sigmaV, dataname=DataName, order=Order);
+		
+}

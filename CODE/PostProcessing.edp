@@ -1,0 +1,68 @@
+// ================================================================================
+// ================================================================================
+// ================================================================================
+// BOUNDARY CONDITIONS (This is a personalised function)
+// ================================================================================
+// Function to create the cycling boundary conditions,
+// in this case for displacement
+
+func real PostProcessing(int cond, int nDN, int nt){
+
+	// ======================================
+	// Mesh adaptation at every step ========
+				
+	cout << " " << endl;
+	cout << "    Mesh adaptation" << endl;	
+			
+	// 1. CLONE THE PRE-ADAPTED FIELDS (Lock uncorrupted data in memory)
+    
+	Th = MeshAdaptation(Th,u1[],d[]);		
+	d=d; [u1,u2]=[u1,u2]; 
+	Hold=Hold; 
+	H=H;
+	alphaold=alphaold;
+	fhvold=fhvold;
+	fdf=fdf; 
+	
+	real gamma;
+	if (Usingmask==1){
+
+		// Solve the mask field
+		GenerateMask;
+
+		// Enforce strict clipping to ensure the field stays exactly between 0 and 1
+		mask = max(0.0, min(1.0, mask));
+	}
+	
+    H=Hold;
+    
+    if (DN>0){
+		fhvnminus2=fhvnminus2; fhvnminus1=fhvnminus1; fhvn=fhvn;
+	}
+    
+	if (DN > 0){
+		if(cond==-2){
+			fhvnminus2 = fhvold;
+		}
+		if(cond==-1){
+			fhvnminus1 = fhvold;
+		}
+		if(cond==0){
+			fhvn = fhvold;
+		}
+		
+	}								
+	
+	fdf[] = Fatiguedegradationfunction(Th,fhvold[]);
+	
+	// =====================================
+	// Outputs =============================
+	
+	cout << " " << endl;
+	cout << "    Generating outputs" << endl;
+	
+	PlotToFreeFEM(nDN,nt);
+	
+	ExportToVTUfile(Th,d[],u1[],eps11[],eps22[],eps12[],sigma11[],sigma22[],sigma12[],nDN);
+		     
+}

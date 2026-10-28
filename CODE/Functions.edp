@@ -1,0 +1,140 @@
+// ================================================================================
+// ================================================================================
+// ================================================================================
+// FUNCTIONS
+// ================================================================================
+// Function to evaluate the error for the phase field d and displacements
+// within the Newton-Rapshon routine
+func real[int] computError(real[int] &val) {
+    
+	Vh [du1l,du2l];
+	du1l[] = val(0:Vh.ndof-1);
+	    
+    real umax1 = abs(du1l[].max);
+    real umin1 = abs(du1l[].min);
+    if (umax1 < umin1) {
+        umax1 = umin1;
+    }
+    
+    real umax2 = abs(du2l[].max);
+    real umin2 = abs(du2l[].min);
+    if (umax2 < umin2) {
+        umax2 = umin2;
+    }
+    
+    real[int] dl = val(Vh.ndof:Vh.ndof+Xh.ndof-1);
+    real dmax = abs(dl.max);
+    real dmin = abs(dl.min);
+    if (dmax < dmin) {
+        dmax = dmin;
+    }
+    
+    real[int] vmax(2);
+    vmax(0) = sqrt( umax1^2 + umax2^2 );
+    vmax(1) = dmax;
+    
+    return vmax;
+}	
+
+// ================================================================================
+// Function to evaluate the eigenvalues of the strain tensor
+func real[int] EigenVal(mesh &Thl) {
+
+	// Local FEspace
+	fespace Vhl(Thl, [Pk,Pk]);
+	Vhl [eVal1l,eVal2l];
+	
+	fespace Xhl(Thl, Pk);
+	Xhl eVal1laux, eVal2laux;
+	
+	Xhl trace = (eps11 + eps22)/2.0;
+	Xhl det = eps11*eps22 - eps12^2;
+	Xhl aux = trace^2 - det;
+	Xhl disc = sqrt(max(0, aux));
+	
+	[eVal1l,eVal2l] = [trace + disc,trace - disc];
+			
+	return eVal1l[];
+
+}
+// ================================================================================
+// Function to evaluate the eigenvectors of the strain tensor
+func real[int] EigenVec(mesh &Thl, real[int] &eVal1l) {
+
+	// Local FEspace
+	fespace Vhl(Thl, [Pk,Pk,Pk,Pk]);
+	Vhl [eVec1l,eVec2l,eVec3l,eVec4l];
+		
+	fespace Xhl(Thl, Pk);
+
+	real[int] v1(2), v2(2); // Temporaries for eigenvectors
+
+	for (int j = 0; j < Xhl.ndof; j++) {
+		real a = eps11[][j];
+		real b = eps22[][j];
+		real c = eps12[][j];
+		
+		real lambda1 = eVal1l[2*j];
+		real lambda2 = eVal1l[2*j+1];
+		
+		if (abs(c) > 1e-10) {
+		    v1 = [lambda1 - b, c];
+		    v2 = [lambda2 - b, c];
+		    // Normalize
+			real n1 = sqrt(v1'*v1);
+			real n2 = sqrt(v2'*v2);   
+			v1=v1/n1;
+			v2=v2/n2;
+		} else if (abs(a - b) < 1e-10) {
+		    v1 = [1, 0]; v2 = [0, 1];
+		} else if (a > b) {
+
+		    // lambda1 = a, lambda2 = b
+		    v1 = [1, 0];
+		    v2 = [0, 1];
+
+		} else {
+
+		    // lambda1 = b, lambda2 = a
+		    v1 = [0, 1];
+		    v2 = [1, 0];
+
+		}
+		eVec1l[][4*j] = v1(0);
+		eVec1l[][4*j+1] = v1(1);
+		eVec1l[][4*j+2] = v2(0);
+		eVec1l[][4*j+3] = v2(1);
+		
+	}
+		
+	return eVec1l[];
+
+}
+// ================================================================================
+// Heaviside function
+func real[int] HeavisideFunction(mesh &Thl, real[int] &val)
+{
+
+	fespace Xhl(Thl, Pk);
+	Xhl Hsf;
+    Hsf[] = val;    
+ 
+	Hsf = (Hsf > 0) ? 1. : 0.;
+	
+    return Hsf[];
+}
+// ================================================================================
+// Fatigue degradation function
+func real[int] Fatiguedegradationfunction(mesh &Thl, real[int] &val)
+{
+
+    fespace Xhl(Thl, Pk);
+    Xhl fdfl, alphabar;
+    alphabar[] = val;
+     
+    fdfl = (alphabar <= alphaT)
+       ? 1.0
+       : (2.0 / (alphabar/alphaT + 1.0))^2;
+            
+	return fdfl[];
+}

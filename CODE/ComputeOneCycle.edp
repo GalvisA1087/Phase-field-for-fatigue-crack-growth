@@ -1,0 +1,168 @@
+// ================================================================================
+// ================================================================================
+// ================================================================================
+// FUNCTION TO COMPUTE ONE COMPLETE CYCLE
+// ================================================================================
+func real ComputeCycle(int nDN)
+{
+				
+	for (int i = 0; i < Nc; i++){ // loop for the point loads in a cycle
+
+		// ================================================================================
+		// ================================================================================
+		// ================================================================================
+		// ==========================================
+		// load increment ===========================	
+		
+		uload = OneCycle(i);		
+		
+		cout << " " << endl; 
+		cout << " Step = " << i+1 << ",  u_2 (dimensionless) = " << uload << ",  u_2 = " << uload*curlU*1000 << " mm" <<endl;
+		cout << " " << endl; 
+			
+		Xh alpha;	
+			
+		for (int j = 0; j < Ncorr+1; j++){	
+								
+			// =============================================================
+			// Computing the displacement problem ==========================		
+			cout << " " << endl; 
+			cout << "        Solving the coupled displacement-phase field problem" << endl; 
+							
+			real[int] Ft=rhsu0(0,Vh);
+			real[int] Fd=rhsd0(0,Xh);
+			real[int] F = [Ft,Fd];				
+			Nitr=0;	errordNR=1.0; erroruNR=1.0;	
+			while ( (erroruNR > Tol) || (errordNR > Tol) ){
+			
+			
+				matrix K00=Displacement0(Vh,Vh);	
+				matrix K11=Phasefield0(Xh,Xh);	
+				real[int] xk = [u1[],d[]];				 
+				matrix Kt = [[K00,0], [0,K11]];	
+				set(Kt,solver="SPARSESOLVER",tgv=1e30); // MUMPS can be also used here		
+				real[int] Xaux = Kt*xk;	
+				real[int] R = F - Xaux;	    		
+				real[int] dxkp1 = Kt^-1 * R;
+							
+				u1[] += dxkp1(0:Vh.ndof-1);
+				d[] += dxkp1(Vh.ndof:Vh.ndof+Xh.ndof-1);
+					
+				[erroruNR,errordNR] = computError(dxkp1);	
+				
+				Nitr += 1;
+				cout << "     	  	" << " Error uNR: " << erroruNR << " Error dNR: " << errordNR << " Iteration: " << Nitr << endl;			    
+			}
+			
+			d = min(1.0,max(0.0,d));	
+										
+			if (nDN<=1 && j==0){
+			
+				cout << " " << endl;
+				cout << "    Mesh adaptation" << endl;	
+					
+				Th = MeshAdaptation(Th,u1[],d[]);		
+				d=d; [u1,u2]=[u1,u2]; Hold=Hold; H=H;
+				alphaold=alphaold;
+				fhvold = fhvold;		
+				fdf=fdf; 
+				
+				if (Usingmask==1){
+					
+					// Solve the mask field
+					GenerateMask;
+
+					// Enforce strict clipping to ensure the field stays exactly between 0 and 1
+					mask = max(0.0, min(1.0, mask));
+				}
+				
+			}	
+							
+			// ==========================================================================================================================
+			// ==========================================================================================================================
+			// ==========================================================================================================================
+			// ==========================================================================================================================
+			// ==========================================================================================================================
+			// ==========================================================================================================================
+			// =============================================================
+			// Computing strains 			  ==============================
+					
+			cout << " " << endl;
+			cout << "    Computing strains" << endl;
+				
+			eps11 = dx(u1); 
+			eps22 = dy(u2) ; 
+			eps12 = (dy(u1)+dx(u2))/2 ;
+					
+			// =============================================================
+			// Evaluating eigenvalues and eigenvectors from eps_ij =========
+			
+			cout << " " << endl;
+			cout << "    Computing split energy" << endl;
+			Vh2 [eVal1,eVal2];
+			Vh4 [eVec1,eVec2,eVec3,eVec4];	
+			
+			eVal1[] = EigenVal(Th);	
+			eVec1[] = EigenVec(Th,eVal1[]);
+					
+			Xh e1 = eVal1*eVec1^2 + eVal2*eVec3^2;
+			Xh e2 = eVal1*eVec2^2 + eVal2*eVec4^2;
+				
+			Xh e1p = ( eVal1 + abs(eVal1) )/ 2.0;
+			Xh e2p = ( eVal2 + abs(eVal2) )/ 2.0;
+			
+			Xh e11p = e1p*eVec1^2 + e2p*eVec3^2;
+			Xh e12p = e1p*eVec1*eVec2 + e2p*eVec3*eVec4;
+			Xh e22p = e1p*eVec2^2 + e2p*eVec4^2;
+			
+			Xh trepsp = (e1+e2)/2.0 + abs(e1+e2)/2.0 ;
+									
+			// =============================================================
+			// Strain energy and mixed criterion ===========================		
+			// New energy		
+			cout << " " << endl;
+			cout << "    Checking irreversibility" << endl;
+						
+			Xh Hnewp = 0.5*lambda*trepsp^2 + mu*( e11p^2+ 2.0*e12p^2 +e22p^2 );
+			
+			if (Usingmask==1){
+				H = max(Hnewp*mask,Hold);	
+			}else{
+				H = max(Hnewp,Hold);	
+			}
+			
+			
+			// =============================================================
+			// Cumulative fatigue variable =================================		
+			// New variable
+						
+			cout << " " << endl;
+			cout << "    Finding fhv, and fdf" << endl;
+			if (Usingmask==1){		
+				alpha = (1-d)^2 * mask * Hnewp;
+			}else{
+				alpha = (1-d)^2 * Hnewp;
+			}
+			Xh dH = alpha - alphaold;
+			Xh Heaviside; 
+			Heaviside[] = HeavisideFunction(Th,dH[]);					
+			fhv = fhvold + abs(dH) * Heaviside; 		
+			fdf[] = Fatiguedegradationfunction(Th,fhv[]);
+		
+		}
+		
+		// ================================================================================
+		// Updating fields ================================================================
+
+		cout << " " << endl;
+		cout << "    Updating fields within cycle" << endl;
+		
+		Hold = H;		
+		fhvold = fhv;
+		alphaold = alpha;		
+		
+	}	
+	
+
+}
+

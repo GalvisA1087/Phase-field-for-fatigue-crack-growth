@@ -1,0 +1,18 @@
+// ================================================================================
+// ================================================================================
+// Function to plot here in freefem (only for serial version)
+
+func real  PlotToFreeFEM(int i, int nt){
+	
+	// the first parameter can be changed:
+	// Th - mesh
+	// d - phase field
+	// [u1,u2] - displacement (vector field). It also works for each displacement
+	// real ur = sqrt( u1^2 + u2^2 )
+	// Any of the strains, or stresses
+	// Notice that this is for the dimensionless system, for dimensional results
+	// you should go to paraview
+		
+	plot(d,value=true,fill=1,nbiso=30,cmm="Cycle: "+i+", Nloop: "+nt);
+	
+}	

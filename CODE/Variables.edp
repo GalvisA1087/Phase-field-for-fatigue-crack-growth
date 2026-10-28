@@ -1,0 +1,44 @@
+// ================================================================================
+// ================================================================================
+// ================================================================================
+// LOADING AND INCLUDING LIBRARIES
+// ================================================================================
+load "iovtk"
+load "lapack"
+load "MUMPS_seq"
+// ================================================================================
+// ================================================================================
+// SOME VARIABLES
+// ================================================================================
+
+
+real gamma; // Mask variable
+
+// Number of iterations to solve one load step
+int Nitr, NitrCycle;
+real errordNR, erroruNR; 
+int nDN=2;
+
+// dimensionless fatigue threshold elastic strain energy density
+alphaT = ( L0^2 / (lambda*curlU^2) ) * alphaT;
+
+// Dimensionless material properties
+Gc = ( l/(lambda*(curlU^2)) )*Gc;
+mu = mu/lambda;
+lambda = lambda/lambda;
+
+// Dimensionless length scale parameter
+real beta = (l/L0)^2;
+ 
+real[int] OneCycle(Nc);	
+
+// prescribed displacement
+real uload=0;
+
+// Paraview variables
+int[int] Order = [1,1,1];
+string DataName;
+
+// Time
+real time;
+real tsolve, tsolve0, Totaltime;

@@ -1,0 +1,18 @@
+func mesh MeshAdaptation(mesh &Thl, real[int] &val1, real[int] &val2){
+
+	// Local FEspace
+	// for phase field
+	fespace Xhl(Thl, Pk);
+	Xhl dl=val2; 
+	
+	// for displacement
+	fespace Vhl(Thl, [Pk,Pk]); 
+	Vhl [u1l,u2l];
+	u1l[] = val1;	
+	
+	Thl = adaptmesh(Thl, [u1l,u2l], dl, err=error, hmin=sqrt(beta)*zeta, hmax=lmax, iso=tm, verbosity=0,nbvx = mNv,ratio = rat,abserror = true, keepbackvertices = true,splitpbedge = false); 
+	
+	return Thl; 
+
+}    
+ 
