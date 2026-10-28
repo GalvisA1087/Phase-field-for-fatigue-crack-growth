@@ -60,7 +60,7 @@ To run the code, you need:
 
 ## 🚀 How to Run an Example
 
-By default, `CODE/` is configured for the **plate with a hole and multiple cracks** (Section 4.4) with `Ncorr = 1`, so it can be run directly.
+By default, `CODE/` is configured for the **plate with a hole and multiple cracks** (Section 4.1), so it can be run directly.
 
 1. Choose the example you want to run from the `Examples/` directory (e.g. `Examples/4.2/`)
 2. Copy the five `.edp` files from that folder into the `CODE/` directory, replacing the existing files
