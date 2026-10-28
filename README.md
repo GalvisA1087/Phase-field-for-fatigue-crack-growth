@@ -12,7 +12,7 @@ This repository contains a fully documented implementation of an adaptive **phas
 It accompanies the paper:
 
 > _An adaptive phase-field framework for low- and high-cycle fatigue crack growth in brittle materials_  
-> A.F. Galvis, S. Sahu, D.M. Prada, J.A. Ávila  
+> Andres F. Galvis, Smita Sahu, Daniel M. Prada, Julian A. Ávila  
 > *Submitted to International Journal of Fatigue (DOI to be added upon publication)*
 
 and builds on the quasi-static and dynamic implementation available at [Phase-field-for-brittle-fracture](https://github.com/GalvisA1087/Phase-field-for-brittle-fracture).
