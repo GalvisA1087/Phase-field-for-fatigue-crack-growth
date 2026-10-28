@@ -1,5 +1,7 @@
 # Phase-field-for-fatigue-crack-growth
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23731262.svg)](https://doi.org/10.5281/zenodo.23731262)
+
 **Phase-field modelling of low- and high-cycle fatigue crack growth in brittle materials using FreeFEM++**
 
 This repository contains a fully documented implementation of an adaptive **phase-field framework for fatigue crack growth in brittle materials**, covering both the **low-cycle (LCF)** and **high-cycle (HCF)** fatigue regimes, using [FreeFEM++](https://freefem.org). The code is written for serial execution and combines:
